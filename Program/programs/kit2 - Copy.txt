@@ -1,0 +1,228 @@
+// LCD module connections
+sbit LCD_RS at RB1_bit;
+sbit LCD_EN at RB2_bit;
+sbit LCD_D4 at RB3_bit;
+sbit LCD_D5 at RB4_bit;
+sbit LCD_D6 at RB5_bit;
+sbit LCD_D7 at RB6_bit;
+
+sbit LCD_RS_Direction at TRISB1_bit;
+sbit LCD_EN_Direction at TRISB2_bit;
+sbit LCD_D4_Direction at TRISB3_bit;
+sbit LCD_D5_Direction at TRISB4_bit;
+sbit LCD_D6_Direction at TRISB5_bit;
+sbit LCD_D7_Direction at TRISB6_bit;
+// End LCD module connections
+
+
+
+char rfid[11];
+
+int idx=0;
+int valid1;
+int valid2;
+
+
+////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+void main() {
+int i;
+int temp1;
+char test[32];
+uart1_init(2400);
+CE_DIR=0;
+CSN_DIR=0;
+CSK_DIR=0;
+MOSI_DIR=0;
+MISO_DIR=1;
+delay_ms(500);
+nrf24_config();
+CSN=1;
+CE=1;
+
+
+
+
+lcd_init();
+Lcd_Cmd(_LCD_CURSOR_OFF);
+//lcd_out(2,1,"welcome");
+
+trisb.f0=0;
+rb0_bit=0;
+trisd.f0=0;
+for(i=0;i<30;i++)
+{
+rd0_bit=1;
+delay_us(400);
+rd0_bit=0;
+delay_us(19600);
+
+}
+uart1_write_text("TEST");
+uart1_write(13);
+
+//lcd_out(1,1,"S");
+while(1)
+{
+  temp1=read_add(0x07);
+if(((temp1&0b01000000)>>6)==1)
+{
+CE=0;
+delay_ms(50);
+//lcd_out(1,1,"data");
+read_buff(0x61,test,32);
+uart1_write_text(test);
+lcd_out(1,1,test);
+reset();
+CE=1;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ if(uart1_data_ready())
+ {
+  rfid[idx]=uart1_read();
+
+   ///////////////////////////////////////////////////////////03002e2838
+  if(rfid[idx]=='0'&&valid2<10)
+  {
+   valid2++;
+  }
+   else if(rfid[idx]=='3'&&valid2<10)
+  {
+   valid2++;
+  }
+   else if(rfid[idx]=='2'&&valid2<10)
+  {
+   valid2++;
+  }
+  else if(rfid[idx]=='E'&&valid2==5)
+  {
+   valid2++;
+  }
+  else if(rfid[idx]=='8'&&valid2<10)
+  {
+   valid2++;
+   }
+  else
+  {
+  valid2=0;
+  }
+
+
+
+   if(rfid[idx]=='0'&&valid1<10) //03002e90b0
+  {
+   valid1++;
+  }
+   else if(rfid[idx]=='3'&&valid1==1)
+  {
+   valid1++;
+  }
+   else if(rfid[idx]=='2'&&valid1==4)
+  {
+   valid1++;
+  }
+  else if(rfid[idx]=='E'&&valid1==5)
+  {
+   valid1++;
+  }
+  else if(rfid[idx]=='9'&&valid1==6)
+  {
+   valid1++;
+  }
+    else if(rfid[idx]=='B'&&valid1==8)
+  {
+   valid1++;
+  }
+  else
+  {
+  valid1=0;
+  }
+
+
+
+
+
+
+
+
+  if(valid2>=10)
+  {
+  lcd_out(2,1,"User2 : 03002E2838");
+  delay_ms(1000);
+   lcd_cmd(_lcd_clear);
+   lcd_out(2,1,"UnValid");
+   valid2=0;
+   for(i=0;i<30;i++)
+{
+rd0_bit=1;
+delay_us(400);
+rd0_bit=0;
+delay_us(19600);
+
+}
+   delay_ms(1000);
+   lcd_cmd(_lcd_clear);
+  }
+
+
+
+ if(valid1>=10)
+  {
+  lcd_out(2,1,"User1 : 03002E90B0");
+     delay_ms(1000);
+   lcd_cmd(_lcd_clear);
+   lcd_out(2,1,"Valid");
+   valid1=0;
+   for(i=0;i<30;i++)
+{
+rd0_bit=1;
+delay_us(1500);
+rd0_bit=0;
+delay_us(18500);
+
+}
+   delay_ms(1000);
+    for(i=0;i<30;i++)
+{
+rd0_bit=1;
+delay_us(400);
+rd0_bit=0;
+delay_us(19600);
+
+}
+   
+   
+   
+   lcd_cmd(_lcd_clear);
+  }
+
+ }
+
+
+
+}
+
+
+
+
+
+
+}
